@@ -2,6 +2,8 @@
 
 This wiki is maintained entirely by Claude Code. No API key or Python scripts needed — just open this repo in Claude Code and talk to it.
 
+`AGENTS.md` is the canonical cross-agent workflow contract. Keep this file's Claude-specific commands aligned with its schema and constraints.
+
 ## Slash Commands (Claude Code)
 
 | Command | What to say |
@@ -150,6 +152,14 @@ date: YYYY-MM-DD
 ...
 ```
 
+#### Scientific Materials
+
+For experiments, simulations, LAMMPS inputs, code/notebooks and model
+configurations, use the specialized scientific-material rules in `AGENTS.md`.
+Preserve exact values, units, software versions, file names and provenance;
+never execute an ingested script just to summarize it. Starter templates are
+available in `templates/research/`.
+
 ---
 
 ## Query Workflow
@@ -215,9 +225,13 @@ Triggered by: *"build the knowledge graph"* or `/wiki-graph`
 
 When the user asks to build the graph, run `tools/build_graph.py` which:
 - Pass 1: Parses all `[[wikilinks]]` → deterministic `EXTRACTED` edges
-- Pass 2: Infers implicit relationships → `INFERRED` edges with confidence scores
+- Pass 2: Infers typed implicit relationships → `DRAFT` `INFERRED` edges with confidence and evidence
 - Runs Louvain community detection
 - Outputs `graph/graph.json` + `graph/graph.html`
+
+Use `python tools/promote.py` to review high-confidence draft edges. Add
+`--apply` to persist promotion; this updates graph metadata and caches without
+writing wikilinks into page bodies. Query expansion should use `STABLE` edges.
 
 If the user doesn't have Python/dependencies set up, instead generate the graph data manually:
 1. Use Grep to find all `[[wikilinks]]` across wiki pages

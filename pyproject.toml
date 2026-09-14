@@ -1,7 +1,7 @@
 [project]
 name = "llm-wiki"
 version = "0.1.0"
-description = ""
+description = "A local, Markdown-first knowledge wiki maintained by LLM agents"
 authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
@@ -9,6 +9,8 @@ readme = "README.md"
 requires-python = ">=3.10,<3.14"
 dependencies = [
     "markitdown[all] (>=0.1.5,<0.2.0)",
+    "litellm (>=1.83.10,<1.84.0)",
+    "networkx (>=3.6.1,<3.7.0)",
     "tqdm (>=4.67.3,<5.0.0)"
 ]
 

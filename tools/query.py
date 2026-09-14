@@ -23,7 +23,7 @@ from datetime import date
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from tools._utils import (
     REPO_ROOT, WIKI_DIR, INDEX_FILE, LOG_FILE, SCHEMA_FILE,
-    read_file, write_file, call_llm, append_log,
+    read_file, write_file, call_llm, append_log, resolve_wiki_path,
 )
 
 
@@ -62,7 +62,10 @@ def find_relevant_pages(question: str, index_content: str) -> list[Path]:
             page_ids = {p.relative_to(WIKI_DIR).as_posix().replace('.md', '') for p in relevant}
             neighbors = set()
             for edge in graph_data.get('edges', []):
-                if edge.get('confidence', 0) >= 0.7:
+                # Semantic edges are exploratory until they have passed a
+                # promotion step. Explicit links remain backward compatible.
+                stable = edge.get('status', 'STABLE') == 'STABLE'
+                if stable and edge.get('confidence', 0) >= 0.7:
                     if edge['from'] in page_ids:
                         neighbors.add(edge['to'])
                     elif edge['to'] in page_ids:
@@ -147,12 +150,16 @@ Write a well-structured markdown answer with headers, bullets, and [[wikilink]] 
                 return
             save_path = f"syntheses/{slug}.md"
 
-        full_save_path = WIKI_DIR / save_path
+        full_save_path = resolve_wiki_path(save_path, {"syntheses"})
+        source_slugs = [
+            p.stem for p in relevant_pages
+            if p.parent == WIKI_DIR / "sources"
+        ]
         frontmatter = f"""---
 title: "{question[:80]}"
 type: synthesis
 tags: []
-sources: []
+sources: {json.dumps(source_slugs, ensure_ascii=False)}
 last_updated: {today}
 ---
 
@@ -161,7 +168,8 @@ last_updated: {today}
 
         # Update index
         index_content = read_file(INDEX_FILE)
-        entry = f"- [{question[:60]}]({save_path}) — synthesis"
+        index_path = full_save_path.relative_to(WIKI_DIR).as_posix()
+        entry = f"- [{question[:60]}]({index_path}) — synthesis"
         # Match the Syntheses header with or without a trailing newline (e.g. when
         # the section sits at the very end of index.md with no final newline).
         syntheses_pattern = re.compile(r"^## Syntheses[^\n]*(?:\n|$)", re.MULTILINE)
@@ -170,7 +178,7 @@ last_updated: {today}
         else:
             index_content += f"\n\n## Syntheses\n{entry}\n"
         INDEX_FILE.write_text(index_content, encoding="utf-8")
-        print(f"  indexed: {save_path}")
+        print(f"  indexed: {index_path}")
 
     # Append to log
     append_log(f"## [{today}] query | {question[:80]}\n\nSynthesized answer from {len(relevant_pages)} pages." +

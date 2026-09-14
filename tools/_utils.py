@@ -22,7 +22,9 @@ INDEX_FILE = WIKI_DIR / "index.md"
 LOG_FILE = WIKI_DIR / "log.md"
 OVERVIEW_FILE = WIKI_DIR / "overview.md"
 GRAPH_DIR = REPO_ROOT / "graph"
-SCHEMA_FILE = REPO_ROOT / "CLAUDE.md"
+# AGENTS.md is the canonical cross-agent workflow contract. The other agent
+# config files provide host-specific commands around the same schema.
+SCHEMA_FILE = REPO_ROOT / "AGENTS.md"
 
 # Default metadata files to exclude from wiki page listings.
 _META_EXCLUDE = {"index.md", "log.md", "lint-report.md"}
@@ -40,6 +42,33 @@ def write_file(path: Path, content: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     print(f"  wrote: {path.relative_to(REPO_ROOT)}")
+
+
+def resolve_wiki_path(relative_path: str | Path, allowed_dirs: set[str] | None = None) -> Path:
+    """Resolve a user/model-provided path inside ``wiki/`` safely.
+
+    ``allowed_dirs`` can restrict writes to top-level wiki directories such as
+    ``{"entities", "concepts"}``. This keeps generated paths from escaping the
+    repository through ``..`` or absolute path components.
+    """
+    candidate = Path(relative_path)
+    if candidate.is_absolute():
+        raise ValueError(f"Wiki path must be relative: {relative_path}")
+
+    root = WIKI_DIR.resolve()
+    resolved = (WIKI_DIR / candidate).resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"Wiki path escapes wiki/: {relative_path}") from exc
+
+    if allowed_dirs:
+        rel = resolved.relative_to(root)
+        if not rel.parts or rel.parts[0] not in allowed_dirs:
+            allowed = ", ".join(sorted(allowed_dirs))
+            raise ValueError(f"Wiki path must be inside one of: {allowed}")
+
+    return resolved
 
 
 # ── LLM ────────────────────────────────────────────────────────────────

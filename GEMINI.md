@@ -2,6 +2,8 @@
 
 This wiki is maintained entirely by Gemini CLI. No API key or Python scripts needed — just open this repo with `gemini` and talk to it.
 
+`AGENTS.md` is the canonical cross-agent workflow contract. Keep this file's Gemini-specific instructions aligned with its schema and constraints.
+
 ## How to Use
 
 Describe what you want in plain English:
@@ -143,6 +145,14 @@ date: YYYY-MM-DD
 ...
 ```
 
+#### Scientific Materials
+
+For experiments, simulations, LAMMPS inputs, code/notebooks and model
+configurations, follow the specialized scientific-material rules in
+`AGENTS.md`. Preserve exact values, units, software versions, file names and
+provenance; never execute an ingested script just to summarize it. Starter
+templates are available in `templates/research/`.
+
 ---
 
 ## Query Workflow
@@ -199,7 +209,7 @@ Output a health report. Use `--save` to write to `wiki/health-report.md`.
 
 Triggered by: *"build graph"*
 
-Try `python tools/build_graph.py --open` first. If unavailable, build graph.json and graph.html manually from wikilinks.
+Try `python tools/build_graph.py --open` first. If unavailable, build graph.json and graph.html manually from wikilinks. Explicit links are stable; inferred links are draft relationships with confidence and evidence until reviewed with `python tools/promote.py`.
 
 ---
 

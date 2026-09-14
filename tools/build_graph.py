@@ -63,6 +63,21 @@ EDGE_COLORS = {
     "AMBIGUOUS": "#BDBDBD",
 }
 
+GRAPH_SCHEMA_VERSION = 2
+RELATION_TYPES = {
+    "LINKS_TO",
+    "PROPOSES",
+    "USES",
+    "STUDIES",
+    "VALIDATES",
+    "COMPARES_WITH",
+    "EXTENDS",
+    "CONTRADICTS",
+    "DERIVED_FROM",
+    "REPRODUCES",
+    "RELATED_TO",
+}
+
 
 def extract_frontmatter_type(content: str) -> str:
     match = re.search(r'^type:\s*(\S+)', content, re.MULTILINE)
@@ -73,8 +88,9 @@ def page_id(path: Path) -> str:
     return path.relative_to(WIKI_DIR).as_posix().replace(".md", "")
 
 
-def edge_id(src: str, target: str, edge_type: str) -> str:
-    return f"{src}->{target}:{edge_type}"
+def edge_id(src: str, target: str, edge_type: str, relation: str | None = None) -> str:
+    suffix = f"{edge_type}:{relation}" if relation else edge_type
+    return f"{src}->{target}:{suffix}"
 
 
 def load_cache() -> dict:
@@ -122,70 +138,78 @@ def build_extracted_edges(pages: list[Path]) -> list[dict]:
     for p in pages:
         content = read_file(p)
         src = page_id(p)
-        for link in extract_wikilinks(content, unique=True):
-            target = stem_map.get(link.lower())
-            if target and target != src:
-                key = (src, target)
-                if key not in seen:
-                    seen.add(key)
-                    edges.append({
-                        "id": edge_id(src, target, "EXTRACTED"),
-                        "from": src,
-                        "to": target,
-                        "type": "EXTRACTED",
-                        "color": EDGE_COLORS["EXTRACTED"],
-                        "confidence": 1.0,
-                    })
+        seen_in_page = set()
+        for line_no, line in enumerate(content.splitlines(), 1):
+            for link in extract_wikilinks(line):
+                target_name = link.split("|", 1)[0].split("#", 1)[0].strip()
+                target = stem_map.get(target_name.lower())
+                if target and target != src:
+                    key = (src, target)
+                    if key not in seen and key not in seen_in_page:
+                        seen.add(key)
+                        seen_in_page.add(key)
+                        edges.append({
+                            "id": edge_id(src, target, "EXTRACTED"),
+                            "from": src,
+                            "to": target,
+                            "type": "EXTRACTED",
+                            "relation": "LINKS_TO",
+                            "status": "STABLE",
+                            "color": EDGE_COLORS["EXTRACTED"],
+                            "confidence": 1.0,
+                            "evidence": {
+                                "page": src,
+                                "line": line_no,
+                                "excerpt": line.strip()[:240],
+                            },
+                        })
     return edges
 
 
-def load_checkpoint() -> tuple[list[dict], set[str]]:
-    """Load previously inferred edges from JSONL checkpoint file."""
-    edges = []
-    completed = set()
+def load_checkpoint() -> dict[str, dict]:
+    """Load the latest inference record for each page from JSONL."""
+    records: dict[str, dict] = {}
     if INFERRED_EDGES_FILE.exists():
         for line in INFERRED_EDGES_FILE.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             try:
                 record = json.loads(line)
-                completed.add(record["page_id"])
-                for edge in record.get("edges", []):
-                    if not isinstance(edge, dict) or "from" not in edge or "to" not in edge:
-                        continue
-                    rel_type = edge.get("type", "INFERRED")
-                    edges.append({
-                        "id": edge.get("id", edge_id(edge["from"], edge["to"], rel_type)),
-                        "from": edge["from"],
-                        "to": edge["to"],
-                        "type": rel_type,
-                        "title": edge.get("title", edge.get("relationship", "")),
-                        "label": edge.get("label", ""),
-                        "color": edge.get("color", EDGE_COLORS.get(rel_type, EDGE_COLORS["INFERRED"])),
-                        "confidence": float(edge.get("confidence", 0.7)),
-                    })
+                records[record["page_id"]] = record
             except (json.JSONDecodeError, KeyError):
                 continue
-    return edges, completed
+    return records
 
 
-def append_checkpoint(page_id_str: str, edges: list[dict]):
+def append_checkpoint(page_id_str: str, source_hash: str, context_hash: str, edges: list[dict]):
     """Append one page's inferred edges to the JSONL checkpoint."""
     GRAPH_DIR.mkdir(parents=True, exist_ok=True)
-    record = {"page_id": page_id_str, "edges": edges, "ts": date.today().isoformat()}
+    record = {
+        "page_id": page_id_str,
+        "hash": source_hash,
+        "context_hash": context_hash,
+        "edges": edges,
+        "ts": date.today().isoformat(),
+    }
     with open(INFERRED_EDGES_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def build_inferred_edges(pages: list[Path], existing_edges: list[dict], cache: dict, resume: bool = True) -> list[dict]:
     """Pass 2: API-inferred semantic relationships with checkpoint/resume."""
-    checkpoint_edges, completed_ids = ([], set())
+    checkpoint_records: dict[str, dict] = {}
     if resume:
-        checkpoint_edges, completed_ids = load_checkpoint()
-        if completed_ids:
-            print(f"  checkpoint: {len(completed_ids)} pages already done, {len(checkpoint_edges)} edges loaded")
+        checkpoint_records = load_checkpoint()
+        if checkpoint_records:
+            print(f"  checkpoint: {len(checkpoint_records)} page records loaded")
 
-    new_edges = list(checkpoint_edges)
+    current_page_ids = {page_id(p) for p in pages}
+    context_hash = sha256("\n".join([
+        f"schema:{GRAPH_SCHEMA_VERSION}",
+        *(f"{page_id(p)}:{sha256(read_file(p))}" for p in pages),
+    ]))
+    new_edges: list[dict] = []
+    completed_ids: set[str] = set()
 
     changed_pages = []
     for p in pages:
@@ -194,22 +218,46 @@ def build_inferred_edges(pages: list[Path], existing_edges: list[dict], cache: d
         pid = page_id(p)
         entry = cache.get(str(p))
 
-        if pid in completed_ids:
+        checkpoint = checkpoint_records.get(pid)
+        if checkpoint and checkpoint.get("hash") == h and checkpoint.get("context_hash") == context_hash:
+            for edge in checkpoint.get("edges", []):
+                if not isinstance(edge, dict) or edge.get("to") not in current_page_ids:
+                    continue
+                rel_type = edge.get("type", "INFERRED")
+                new_edges.append({
+                    "id": edge.get("id", edge_id(pid, edge["to"], rel_type, edge.get("relation"))),
+                    "from": pid,
+                    "to": edge["to"],
+                    "type": rel_type,
+                    "relation": edge.get("relation", "RELATED_TO"),
+                    "status": edge.get("status", "DRAFT"),
+                    "title": edge.get("title", edge.get("relationship", "")),
+                    "label": edge.get("label", ""),
+                    "color": edge.get("color", EDGE_COLORS.get(rel_type, EDGE_COLORS["INFERRED"])),
+                    "confidence": float(edge.get("confidence", 0.7)),
+                    "evidence": edge.get("evidence", {"page": pid, "kind": "semantic_page_context"}),
+                })
+            completed_ids.add(pid)
             continue
 
-        if isinstance(entry, dict) and entry.get("hash") == h:
+        if isinstance(entry, dict) and entry.get("hash") == h and entry.get("context_hash") == context_hash:
             for rel in entry.get("edges", []):
+                if not isinstance(rel, dict) or rel.get("to") not in current_page_ids:
+                    continue
                 rel_type = rel.get("type", "INFERRED")
                 confidence = float(rel.get("confidence", 0.7))
                 new_edges.append({
-                    "id": edge_id(pid, rel["to"], rel_type),
+                    "id": edge_id(pid, rel["to"], rel_type, rel.get("relation")),
                     "from": pid,
                     "to": rel["to"],
                     "type": rel_type,
+                    "relation": rel.get("relation", "RELATED_TO"),
+                    "status": rel.get("status", "DRAFT"),
                     "title": rel.get("relationship", ""),
                     "label": "",
                     "color": EDGE_COLORS.get(rel_type, EDGE_COLORS["INFERRED"]),
                     "confidence": confidence,
+                    "evidence": rel.get("evidence", {"page": pid, "kind": "semantic_page_context"}),
                 })
         else:
             changed_pages.append(p)
@@ -251,7 +299,7 @@ Already-extracted edges from this page:
 Return ONLY a JSON object containing an "edges" array of NEW relationships not already captured by explicit wikilinks. The response must be STRICTLY valid JSON formatted exactly like this:
 {{
   "edges": [
-    {{"to": "page-id", "relationship": "one-line description", "confidence": 0.0-1.0, "type": "INFERRED or AMBIGUOUS"}}
+    {{"to": "page-id", "relation": "PROPOSES|USES|STUDIES|VALIDATES|COMPARES_WITH|EXTENDS|CONTRADICTS|DERIVED_FROM|REPRODUCES|RELATED_TO", "relationship": "one-line reason", "confidence": 0.0-1.0, "type": "INFERRED or AMBIGUOUS"}}
   ]
 }}
 
@@ -288,33 +336,46 @@ Rules:
                 edges_list = []
 
             for rel in edges_list:
-                if isinstance(rel, dict) and "to" in rel:
+                if isinstance(rel, dict) and rel.get("to") in current_page_ids and rel["to"] != src:
                     confidence = float(rel.get("confidence", 0.7))
+                    confidence = max(0.0, min(1.0, confidence))
                     rel_type = rel.get("type") or ("INFERRED" if confidence >= 0.7 else "AMBIGUOUS")
+                    if rel_type not in {"INFERRED", "AMBIGUOUS"}:
+                        rel_type = "INFERRED" if confidence >= 0.7 else "AMBIGUOUS"
+                    relation = str(rel.get("relation", "RELATED_TO")).upper()
+                    if relation not in RELATION_TYPES:
+                        relation = "RELATED_TO"
                     edge = {
-                        "id": edge_id(src, rel["to"], rel_type),
+                        "id": edge_id(src, rel["to"], rel_type, relation),
                         "from": src,
                         "to": rel["to"],
                         "type": rel_type,
+                        "relation": relation,
+                        "status": "DRAFT",
                         "title": rel.get("relationship", ""),
                         "label": "",
                         "color": EDGE_COLORS.get(rel_type, EDGE_COLORS["INFERRED"]),
                         "confidence": confidence,
+                        "evidence": {"page": src, "kind": "semantic_page_context"},
                     }
                     page_edges.append(edge)
                     new_edges.append(edge)
                     valid_rels.append({
                         "to": rel["to"],
+                        "relation": relation,
                         "relationship": rel.get("relationship", ""),
                         "confidence": confidence,
                         "type": rel_type,
+                        "status": "DRAFT",
+                        "evidence": {"page": src, "kind": "semantic_page_context"},
                     })
 
             cache[str(p)] = {
                 "hash": sha256(full_content),
+                "context_hash": context_hash,
                 "edges": valid_rels,
             }
-            append_checkpoint(src, page_edges)
+            append_checkpoint(src, sha256(full_content), context_hash, page_edges)
             print(f"-> Found {len(page_edges)} edges.")
         except (json.JSONDecodeError, TypeError, ValueError) as jde:
             print(f"-> [WARN] Invalid JSON: {str(jde)[:60]}")
@@ -326,20 +387,25 @@ Rules:
 
 
 def deduplicate_edges(edges: list[dict]) -> list[dict]:
-    """Merge duplicate and bidirectional edges, keeping highest confidence."""
-    best = {}  # (min(a,b), max(a,b)) -> edge
+    """Merge duplicate directed edges, keeping the strongest record."""
+    best = {}  # (from, to, relation) -> edge
     for e in edges:
         a, b = e["from"], e["to"]
-        key = (min(a, b), max(a, b))
+        key = (a, b, e.get("relation", "RELATED_TO"))
         existing = best.get(key)
-        if not existing or e.get("confidence", 0) > existing.get("confidence", 0):
+        existing_rank = (1 if existing and existing.get("status") == "STABLE" else 0, existing.get("confidence", 0) if existing else 0)
+        edge_rank = (1 if e.get("status") == "STABLE" else 0, e.get("confidence", 0))
+        if not existing or edge_rank > existing_rank:
             best[key] = e
     deduped = []
     for edge in best.values():
         rel_type = edge.get("type", "INFERRED")
-        edge["id"] = edge.get("id", edge_id(edge["from"], edge["to"], rel_type))
+        edge.setdefault("relation", "LINKS_TO" if rel_type == "EXTRACTED" else "RELATED_TO")
+        edge.setdefault("status", "STABLE" if rel_type == "EXTRACTED" else "DRAFT")
+        edge["id"] = edge.get("id") or edge_id(edge["from"], edge["to"], rel_type, edge["relation"])
         edge["color"] = edge.get("color", EDGE_COLORS.get(rel_type, EDGE_COLORS["INFERRED"]))
         edge["confidence"] = float(edge.get("confidence", 0.7 if rel_type != "EXTRACTED" else 1.0))
+        edge.setdefault("evidence", {})
         edge.setdefault("title", "")
         edge.setdefault("label", "")
         deduped.append(edge)
@@ -743,6 +809,7 @@ const originalNodes = {nodes_json};
 const originalEdges = {edges_json}.map(edge => ({{
   ...edge,
   id: edge.id || `${{edge.from}}->${{edge.to}}:${{edge.type || "INFERRED"}}`,
+  title: edge.title || `${{edge.relation || "RELATED_TO"}} | ${{edge.status || "STABLE"}} | confidence ${{Number(edge.confidence || 0).toFixed(2)}}`,
 }}));
 const nodes = new vis.DataSet(originalNodes);
 const edges = new vis.DataSet(originalEdges);
@@ -1198,7 +1265,12 @@ def build_graph(infer: bool = True, open_browser: bool = False, clean: bool = Fa
         node["value"] = degree_map.get(node["id"], 0) + 1  # +1 so isolated nodes are still visible
 
     # Save graph.json
-    graph_data = {"nodes": nodes, "edges": edges, "built": today}
+    graph_data = {
+        "schema_version": GRAPH_SCHEMA_VERSION,
+        "nodes": nodes,
+        "edges": edges,
+        "built": today,
+    }
     GRAPH_JSON.write_text(json.dumps(graph_data, indent=2, ensure_ascii=False))
     print(f"  saved: graph/graph.json  ({len(nodes)} nodes, {len(edges)} edges)")
 

@@ -32,10 +32,12 @@ wiki/         # Agent owns this layer entirely
   concepts/   # Ideas, frameworks, methods, theories
   syntheses/  # Saved query answers
 graph/        # Auto-generated graph data
+templates/    # Reusable templates for research materials
 tools/        # Standalone Python scripts
   health.py   # Structural checks (deterministic, no LLM calls)
   lint.py     # Content quality checks (uses LLM for semantic analysis)
   build_graph.py  # Knowledge graph generation
+  promote.py  # Draft relationship review and promotion
 ```
 
 ---
@@ -147,6 +149,32 @@ date: YYYY-MM-DD
 ...
 ```
 
+#### Scientific Material Templates
+
+Scientific research materials should use a specialized template when their main
+content is an experiment, simulation, LAMMPS input, code or notebook, or model
+configuration. Keep the original file in `raw/` and create a
+structured source page in `wiki/sources/`. Preserve exact parameter values,
+units, software versions, input/output file names, and links to the paper or
+project that gives the material context.
+
+Classify materials with one or more tags from this set:
+`experiment`, `simulation`, `lammps`, `code`, `notebook`, `model`,
+`meeting`, `paper`.
+
+For simulation records, always extract the system, force field or potential,
+boundary conditions, ensemble, temperature, pressure, timestep, run length,
+replicas, reaction method, observables and random seeds when available. For
+code and notebook files, record the purpose, inputs, outputs, environment,
+entry points, important functions and reproduction steps. Do not execute an
+ingested script merely to summarize it.
+
+Reusable starter templates are stored in `templates/research/`:
+
+- `experiment-log.md` — wet-lab or general experimental records
+- `lammps-simulation.md` — LAMMPS and molecular-dynamics records
+- `code-analysis.md` — analysis scripts and notebooks
+
 ---
 
 ## Query Workflow
@@ -221,9 +249,14 @@ First try: `python tools/build_graph.py --open`
 If Python/deps unavailable, build manually:
 1. Search for all `[[wikilinks]]` across wiki pages
 2. Build nodes (one per page) and edges (one per link)
-3. Infer implicit relationships not captured by wikilinks — tag `INFERRED` with confidence score; low confidence → `AMBIGUOUS`
-4. Write `graph/graph.json` with `{nodes, edges, built: date}`
+3. Infer implicit relationships not captured by wikilinks — tag them `DRAFT` with a typed relation, confidence score, and evidence context; low confidence → `AMBIGUOUS`
+4. Write `graph/graph.json` with `{schema_version, nodes, edges, built: date}`
 5. Write `graph/graph.html` as a self-contained vis.js visualization
+
+Explicit wikilinks are `STABLE` `LINKS_TO` edges. Semantic edges are exploratory
+until reviewed. Run `python tools/promote.py` for a dry-run review of draft edges;
+add `--apply` to promote high-confidence candidates. Promotion updates graph
+metadata and inference caches but never inserts links into page bodies.
 
 ---
 

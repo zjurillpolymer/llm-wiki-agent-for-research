@@ -39,7 +39,9 @@ git clone https://github.com/SamurAIGPT/llm-wiki-agent.git
 cd llm-wiki-agent
 ```
 
-Open in your agent — no API key or Python setup needed:
+Open in your agent for the conversational workflow. The standalone Python tools
+need the dependencies listed in `pyproject.toml` or `requirements.txt` and an
+LLM provider key configured for LiteLLM:
 
 ```bash
 claude      # reads CLAUDE.md + .claude/commands/ (slash commands available)
@@ -56,9 +58,14 @@ All agents understand natural language and shorthand triggers:
 ingest raw/papers/my-paper.md              # ingest a markdown source
 ingest report.pdf                          # auto-converts to .md, then ingests
 ingest slides.pptx notes.docx              # batch, mixed formats
+ingest raw/simulations/                     # ingest LAMMPS/MD records
+ingest raw/code/                            # ingest analysis scripts or notebooks
+python tools/ingest.py --all                # scan and ingest all supported files under raw/
 query: what are the main themes?           # synthesize answer from wiki pages
 lint                                       # find orphans, contradictions, gaps
 build graph                                # build graph.html from all wikilinks
+python tools/promote.py --min-confidence 0.9  # review high-confidence draft edges
+python tools/promote.py --min-confidence 0.9 --apply  # promote reviewed edges
 ```
 
 Plain English works too:
@@ -80,6 +87,10 @@ Works with markdown, PDF, DOCX, PPTX, XLSX, HTML, TXT, CSV, JSON, XML, RST, EPUB
 **Entity pages** — auto-created for every person, company, or project mentioned across sources. Updated each time a new source references them.
 
 **Concept pages** — auto-created for every key idea or framework. Cross-referenced to every source that discusses them.
+
+**Research material pages** — experiments, simulations, LAMMPS records, code,
+notebooks and model configurations use structured templates that preserve parameters,
+provenance, inputs and outputs.
 
 **Living overview** — `wiki/overview.md` is revised on every ingest to reflect the current synthesis across everything you've read.
 
@@ -190,10 +201,11 @@ Track a company, market, or technology over time.
 
 Two-pass build:
 
-1. **Deterministic** — parses all `[[wikilinks]]` across wiki pages → edges tagged `EXTRACTED`
-2. **Semantic** — agent infers implicit relationships not captured by wikilinks → edges tagged `INFERRED` (with confidence score) or `AMBIGUOUS`
+1. **Deterministic** — parses all `[[wikilinks]]` across wiki pages → stable `EXTRACTED` / `LINKS_TO` edges with line evidence
+2. **Semantic** — agent infers typed relationships not captured by wikilinks → `DRAFT` edges tagged `INFERRED` or `AMBIGUOUS`, with confidence and evidence context
+3. **Promotion** — `tools/promote.py` reviews high-confidence draft edges and persists approved status; query expansion uses stable edges by default
 
-Louvain community detection clusters nodes by topic. SHA256 cache means only changed pages are reprocessed. Output is a self-contained `graph.html` — no server, opens in any browser.
+Louvain community detection clusters nodes by topic. SHA256 cache means only changed pages or graph context are reprocessed. Output is a self-contained `graph.html` — no server, opens in any browser.
 
 ## CLAUDE.md / AGENTS.md
 
@@ -251,6 +263,11 @@ ingest raw/mixed-folder/          # recursively finds all supported files
 **Supported formats:**
 `.md` `.pdf` `.docx` `.pptx` `.xlsx` `.xls` `.html` `.htm` `.txt` `.csv` `.json` `.xml` `.rst` `.rtf` `.epub` `.ipynb` `.yaml` `.yml` `.tsv` `.wav` `.mp3`
 
+Research text artifacts such as `.tex`, `.log`, `.in`, `.data`, `.dump`, `.xyz`,
+`.out`, `.dat`, `.pdb`, `.gro`, `.top`, `.itp`, `.mol`, `.mol2`, `.sdf` and
+`.jsonl` are also accepted. They are read directly without creating converted
+sidecar files.
+
 Non-markdown files are auto-converted via [markitdown](https://github.com/microsoft/markitdown). Use `--no-convert` to skip auto-conversion and process only `.md` files.
 
 ### arXiv Papers (Advanced)
@@ -292,7 +309,8 @@ python tools/file_to_md.py --input_dir raw/imports/ --delete_source  # remove or
 - For arXiv papers, `tools/pdf2md.py` gives higher-fidelity output than generic markitdown conversion
 - Query answers are shown first — the agent then asks if you want to file them as synthesis pages. Your explorations compound just like ingested sources
 - The wiki is a git repo — version history for free
-- Standalone Python scripts in `tools/` work without a coding agent (require `ANTHROPIC_API_KEY`)
+- Standalone Python scripts in `tools/` work without a coding agent when the
+  dependencies are installed and a LiteLLM provider key is configured.
 
 ## Tech Stack
 

@@ -1,0 +1,1272 @@
+{
+  "schema_version": 2,
+  "nodes": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "type": "synthesis",
+      "color": "#9C27B0",
+      "path": "wiki/overview.md",
+      "markdown": "---\ntitle: \"Overview\"\ntype: synthesis\ntags: []\nsources: []\nlast_updated: \"2026-09-14\"\n---\n\n# Overview\n\nThe current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molecular fingerprints with physical models to explain organic micropollutant rejection by [[PolyamideMembranes]], whereas [[PerioGT]] builds a polymer representation that explicitly preserves [[PolymerPeriodicity]].\n\nThe membrane study shows that rejection cannot always be explained by isolated functional groups. Molecular context and multigroup coupling can change the direction and importance of a group-level effect, so membrane design needs to account for hydrophobic interaction, size sieving, Donnan exclusion and operating conditions together. The polymer study makes a parallel representation-learning argument: polymer structures should not be treated as ordinary small-molecule graphs, because repeated units and polymer-level conditions carry essential information.\n\nTogether, the papers support a common research pattern: encode domain knowledge into machine-learning representations, use interpretable analyses to connect predictions to mechanisms, and validate the resulting design rules with experiments. The current evidence covers water-treatment membranes, polymer property prediction and antimicrobial polymer discovery; it does not yet cover molecular dynamics as a primary design loop or compare the two model families on a shared dataset.\n",
+      "preview": "# Overview The current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molec",
+      "group": -1,
+      "value": 5
+    },
+    {
+      "id": "concepts/PolymerGraph",
+      "label": "PolymerGraph",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/PolymerGraph.md",
+      "markdown": "---\ntitle: \"PolymerGraph\"\ntype: concept\ntags: [graph-learning, polymer-informatics]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# PolymerGraph\n\nPolymerGraph is the graph representation used by PerioGT. Polymer repeating units are converted from SMILES into graphs, and virtual nodes connect components or carry sample-level conditions such as copolymer type and molecular weight. This design lets the graph encoder preserve local chemical structure while also communicating global polymer and experimental context.\n\n## Connections\n\n- [[PerioGT]] — Main model using PolymerGraph.\n- [[PolymerPeriodicity]] — Repeated-unit structure motivates the representation.\n- [[ContrastiveLearning]] — Augmented PolymerGraph views support pre-training.\n",
+      "preview": "# PolymerGraph PolymerGraph is the graph representation used by PerioGT. Polymer repeating units are converted from SMILES into graphs, and virtual nodes connect components or carry sample-level conditions such as copoly",
+      "group": -1,
+      "value": 9
+    },
+    {
+      "id": "concepts/DSPM-DE",
+      "label": "DSPM-DE",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/DSPM-DE.md",
+      "markdown": "---\ntitle: \"DSPM-DE\"\ntype: concept\ntags: [physical-model, membrane-science, separation]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# DSPM-DE\n\nThe Donnan-Steric Pore Model with Dielectric Exclusion (DSPM-DE) describes how membrane pore structure and charge affect solute transport. In the DMF-MRL framework, it contributes size-sieving and Donnan-partition features, allowing the model to distinguish molecular size resistance from charge-based exclusion.\n\n## Connections\n\n- [[DMF-MRL]] — Embeds DSPM-DE-derived features.\n- [[PolyamideMembranes]] — Membrane pore and charge properties are central inputs.\n- [[OrganicMicropollutants]] — Molecular size and charge vary across OMPs.\n",
+      "preview": "# DSPM-DE The Donnan-Steric Pore Model with Dielectric Exclusion (DSPM-DE) describes how membrane pore structure and charge affect solute transport. In the DMF-MRL framework, it contributes size-sieving and Donnan-partit",
+      "group": -1,
+      "value": 8
+    },
+    {
+      "id": "concepts/DMF-MRL",
+      "label": "DMF-MRL",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/DMF-MRL.md",
+      "markdown": "---\ntitle: \"DMF-MRL\"\ntype: concept\ntags: [machine-learning, interpretable-ml, membranes]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# DMF-MRL\n\nData-mechanism-fused molecular representation learning (DMF-MRL) is the framework proposed for OMP-removal membrane design. It combines molecular fingerprints, multilevel feature descriptors and physical-model features from [[XDLVO]] and [[DSPM-DE]] inside a machine-learning model. The framework uses XGBoost as its selected predictor and applies SHAP, partial-dependence analysis and molecular-dynamics calculations to connect model output with molecular interaction mechanisms.\n\n## Connections\n\n- [[OrganicMicropollutants]] — Prediction target.\n- [[XDLVO]] — Encodes solute-membrane interaction energy.\n- [[DSPM-DE]] — Encodes pore and charge effects.\n- [[PolyamideMembranes]] — Material platform for the design rules.\n- [[PerioGT]] — Related domain-knowledge-guided representation-learning framework.\n",
+      "preview": "# DMF-MRL Data-mechanism-fused molecular representation learning (DMF-MRL) is the framework proposed for OMP-removal membrane design. It combines molecular fingerprints, multilevel feature descriptors and physical-model ",
+      "group": -1,
+      "value": 15
+    },
+    {
+      "id": "concepts/PolymerPeriodicity",
+      "label": "Polymer Periodicity",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/PolymerPeriodicity.md",
+      "markdown": "---\ntitle: \"Polymer Periodicity\"\ntype: concept\ntags: [polymer-science, representation-learning]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# Polymer Periodicity\n\nPolymer periodicity is the repeated-unit structure that distinguishes macromolecules from ordinary small molecules. It affects how local motifs are arranged over a chain and how polymer-level properties emerge. PerioGT treats this periodicity as a prior, using multiple augmented repeating-unit views and a learned prompt so that the representation remains stable across changes in fragment length and arrangement.\n\n## Connections\n\n- [[PerioGT]] — Explicitly models this prior.\n- [[PolymerGraph]] — Represents repeated-unit structure and polymer conditions.\n- [[ContrastiveLearning]] — Uses augmented views to learn periodicity-aware invariance.\n",
+      "preview": "# Polymer Periodicity Polymer periodicity is the repeated-unit structure that distinguishes macromolecules from ordinary small molecules. It affects how local motifs are arranged over a chain and how polymer-level proper",
+      "group": -1,
+      "value": 11
+    },
+    {
+      "id": "concepts/XDLVO",
+      "label": "XDLVO",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/XDLVO.md",
+      "markdown": "---\ntitle: \"XDLVO\"\ntype: concept\ntags: [physical-model, membrane-science]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# XDLVO\n\nXDLVO is a physical framework used in the membrane study to characterize solute-membrane interaction energy. DMF-MRL embeds the interaction-energy feature so that hydrophobic and related interfacial effects can contribute to prediction and interpretation of OMP rejection.\n\n## Connections\n\n- [[DMF-MRL]] — Uses XDLVO as a mechanism feature.\n- [[PolyamideMembranes]] — Membrane surface interactions are modeled.\n- [[OrganicMicropollutants]] — Solutes whose rejection is analyzed.\n",
+      "preview": "# XDLVO XDLVO is a physical framework used in the membrane study to characterize solute-membrane interaction energy. DMF-MRL embeds the interaction-energy feature so that hydrophobic and related interfacial effects can c",
+      "group": -1,
+      "value": 7
+    },
+    {
+      "id": "concepts/ContrastiveLearning",
+      "label": "Contrastive Learning",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/ContrastiveLearning.md",
+      "markdown": "---\ntitle: \"Contrastive Learning\"\ntype: concept\ntags: [self-supervised-learning, representation-learning]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# Contrastive Learning\n\nContrastive learning trains a representation so that related views are close and unrelated views are separated. In PerioGT, multiple periodicity-aware augmentations of a polymer act as related views. The contrastive objective encourages the model to preserve polymer identity and periodic structure despite changes in repeating-unit size, arrangement and small structural perturbations.\n\n## Connections\n\n- [[PerioGT]] — Uses periodicity-aware contrastive pre-training.\n- [[PolymerPeriodicity]] — Defines the invariances the model should learn.\n- [[PolymerGraph]] — Supplies graph views for the self-supervised objective.\n",
+      "preview": "# Contrastive Learning Contrastive learning trains a representation so that related views are close and unrelated views are separated. In PerioGT, multiple periodicity-aware augmentations of a polymer act as related view",
+      "group": -1,
+      "value": 8
+    },
+    {
+      "id": "concepts/PolyamideMembranes",
+      "label": "Polyamide Membranes",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/PolyamideMembranes.md",
+      "markdown": "---\ntitle: \"Polyamide Membranes\"\ntype: concept\ntags: [membranes, water-treatment, materials-science]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# Polyamide Membranes\n\nPolyamide thin-film composite membranes are a major platform for nanofiltration and reverse osmosis because their small pores and surface-charge properties enable molecular-level separation. The membrane study compares how operating conditions, hydrophobic interaction, size sieving and Donnan exclusion contribute to OMP rejection, and tests charge and pore-architecture modifications for more selective removal.\n\n## Connections\n\n- [[OrganicMicropollutants]] — Contaminants targeted by the membranes.\n- [[DMF-MRL]] — Learns and interprets rejection mechanisms.\n- [[XDLVO]] — Describes membrane-solute interaction energy.\n- [[DSPM-DE]] — Describes pore and charge exclusion.\n",
+      "preview": "# Polyamide Membranes Polyamide thin-film composite membranes are a major platform for nanofiltration and reverse osmosis because their small pores and surface-charge properties enable molecular-level separation. The mem",
+      "group": -1,
+      "value": 13
+    },
+    {
+      "id": "concepts/OrganicMicropollutants",
+      "label": "Organic Micropollutants",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/OrganicMicropollutants.md",
+      "markdown": "---\ntitle: \"Organic Micropollutants\"\ntype: concept\ntags: [water-treatment, environmental-science]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# Organic Micropollutants\n\nOrganic micropollutants (OMPs) are diverse, often persistent organic chemicals present at trace concentrations in aquatic systems. Their molecular size, charge, functional groups and hydrophobicity vary substantially, which makes universal membrane-screening rules unreliable. The membrane study in this wiki models OMP rejection by combining molecular fingerprints and physical mechanisms rather than treating one functional group as an isolated predictor.\n\n## Connections\n\n- [[DMF-MRL]] — Model used to explain OMP rejection.\n- [[PolyamideMembranes]] — Main membrane family studied for OMP removal.\n- [[DSPM-DE]] — Represents size sieving and Donnan/dielectric exclusion.\n",
+      "preview": "# Organic Micropollutants Organic micropollutants (OMPs) are diverse, often persistent organic chemicals present at trace concentrations in aquatic systems. Their molecular size, charge, functional groups and hydrophobic",
+      "group": -1,
+      "value": 10
+    },
+    {
+      "id": "concepts/PerioGT",
+      "label": "PerioGT",
+      "type": "concept",
+      "color": "#FF9800",
+      "path": "wiki/concepts/PerioGT.md",
+      "markdown": "---\ntitle: \"PerioGT\"\ntype: concept\ntags: [deep-learning, graph-neural-network, polymer-informatics]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# PerioGT\n\nPerioGT is a periodicity-aware graph-transformer framework for polymer representation learning. It combines [[PolymerGraph]] construction, periodicity-aware augmentation, contrastive learning, masked node modeling and learned periodicity prompts. The resulting representations are fine-tuned for polymer property prediction and candidate screening, including antimicrobial polymer discovery.\n\n## Connections\n\n- [[PolymerPeriodicity]] — Structural prior encoded by PerioGT.\n- [[PolymerGraph]] — Graph representation used by the model.\n- [[ContrastiveLearning]] — Self-supervised training objective.\n- [[DMF-MRL]] — Another materials-ML framework that incorporates domain knowledge.\n",
+      "preview": "# PerioGT PerioGT is a periodicity-aware graph-transformer framework for polymer representation learning. It combines [[PolymerGraph]] construction, periodicity-aware augmentation, contrastive learning, masked node model",
+      "group": -1,
+      "value": 15
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "label": "A smart framework to design membranes for organic micropollutants removal",
+      "type": "source",
+      "color": "#4CAF50",
+      "path": "wiki/sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal.md",
+      "markdown": "---\ntitle: \"A smart framework to design membranes for organic micropollutants removal\"\ntype: source\ntags: [membranes, water-treatment, machine-learning, mechanism]\nsources: []\nlast_updated: 2026-09-14\ndate: 2025-08-25\nsource_file: s41893-025-01617-6.pdf\n---\n\n## Summary\n\nThis paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combines molecular fingerprints with physical descriptions from [[XDLVO]] and [[DSPM-DE]], together with multilevel molecular and membrane descriptors. The authors use the model to show that OMP rejection depends on context-dependent functional-group coupling rather than on isolated functional groups alone, and then construct an interaction framework for tailoring [[PolyamideMembranes]].\n\n## Key Claims\n\n- The dataset contains 2,102 entries covering 277 OMPs, 52 membrane types and 40 descriptions. Among four tested algorithms, XGBoost performed best, with a test R2 of 0.881 after optimization and fivefold cross-validation.\n- DMF-MRL outperforms a data-only model without molecular fingerprints and physical-model features, while retaining interpretable feature contributions through SHAP and partial-dependence analyses.\n- Functional-group importance changes when groups are connected to other substructures. In particular, phenyl-containing structures show multigroup coupling in which hydrophobic interaction, molecular size resistance and pi-pi interactions jointly influence rejection.\n- The effect of increasing phenyl-group count is non-monotonic: stronger membrane interaction can reduce rejection, while the simultaneous increase in molecular size can increase size-sieving resistance.\n- The dominant rejection factors differ across membrane and OMP classes. Hydrophobic interaction is especially important for phenyl-hydrophobic OMPs in nanofiltration, size sieving is important for phenyl-hydrophilic OMPs, and Donnan exclusion is important for phenyl-charged OMPs.\n- The proposed design framework uses surface-charge inversion, zwitterionization, charge enhancement, hydrophilicity and pore architecture to tailor membranes for different OMP classes.\n\n## Key Quotes\n\n> The efficiency of removal depends on the influence of functional-group coupling in the molecular structure.\n\n> The data-mechanism co-driven paradigm has the potential to facilitate the development of advanced water-treatment membranes.\n\n## Connections\n\n- [[DanLu]] — First author and contributor to the membrane design study.\n- [[ZhejiangUniversity]] — The study includes researchers from Zhejiang University.\n- [[OrganicMicropollutants]] — Target contaminants whose rejection is modeled.\n- [[DMF-MRL]] — Main model proposed by the paper.\n- [[XDLVO]] — Physical model embedded to represent solute-membrane interaction energy.\n- [[DSPM-DE]] — Physical model embedded to represent size sieving and Donnan/dielectric exclusion.\n- [[PolyamideMembranes]] — Main membrane family studied and modified experimentally.\n- [[PerioGT]] — Related work in this collection that also embeds polymer-domain knowledge into ML.\n\n## Contradictions\n\n- No direct contradiction with the current wiki. The paper qualifies simple rules based on isolated functional groups by showing that molecular context can reverse or change their apparent effect.\n\n## Source Metadata\n\n- DOI: 10.1038/s41893-025-01617-6\n- Journal: Nature Sustainability\n- Publication date: 25 August 2025\n- Authors: Dan Lu, Zihang Zhao, Xinchen Xiang, Tianyu Li, Yifang Geng, Ming Wu, Yangyang Li, Shiying Xu, Chuanqi Zhang, Zhuofan Gao, Jia-Wei Shen, Lijun Liang, Kai Fan, Zhikan Yao and Lin Zhang.\n",
+      "preview": "## Summary This paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combin",
+      "group": -1,
+      "value": 9
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers",
+      "label": "Periodicity-aware deep learning for polymers",
+      "type": "source",
+      "color": "#4CAF50",
+      "path": "wiki/sources/periodicity-aware-deep-learning-for-polymers.md",
+      "markdown": "---\ntitle: \"Periodicity-aware deep learning for polymers\"\ntype: source\ntags: [polymers, deep-learning, graph-learning, self-supervised-learning]\nsources: []\nlast_updated: 2026-09-14\ndate: 2025-11-20\nsource_file: s43588-025-00903-9.pdf\n---\n\n## Summary\n\nThis paper introduces [[PerioGT]], a periodicity-aware graph-transformer framework for polymer representation learning and property prediction. It treats the repeated-unit structure of polymers as a chemical prior and combines periodicity-aware augmentation, contrastive learning, masked node modeling, virtual nodes and learned periodicity prompts. PerioGT achieves strong performance across polymer prediction tasks and is applied to antimicrobial polymer discovery, where predictions are validated experimentally against methicillin-resistant Staphylococcus aureus (MRSA).\n\n## Key Claims\n\n- Polymer periodicity is a fundamental structural feature that is lost when polymers are simplified to isolated repeating units or ordinary small-molecule graphs.\n- PerioGT pre-trains on approximately one million unlabeled virtual polymers. Its self-supervised objectives combine periodicity-aware contrastive learning with masked node modeling.\n- Periodicity-aware augmentation generates multiple repeating-unit views of the same polymer. The model uses these views to learn representations that remain stable under changes in repeating-unit size, arrangement and minor atomic substitutions.\n- The framework uses [[PolymerGraph]] representations with virtual nodes to connect copolymer components and incorporate sample-level conditions such as copolymer type and molecular weight.\n- PerioGT outperforms the compared supervised and self-supervised baselines on the reported downstream tasks. In periodicity analysis, its average similarity between original repeating units and augmentations is 0.84, and its K-nearest-neighbor classification accuracy exceeds 80%, whereas the other self-supervised baselines remain below 40%.\n- For antimicrobial polymer discovery, the authors generate 624 candidates from 12 diacrylates and 52 amines, synthesize and label 150 of them, and select the top 30 predicted candidates. PerioGT reaches an 83% screening success rate, compared with 57% for TransPolymer and 20% for polyBERT.\n- Two lead polymers have a minimum inhibitory concentration of 8 micrograms per millilitre against MRSA. Follow-up assays show strong bacterial killing, membrane-potential disturbance and membrane disruption.\n\n## Key Quotes\n\n> Existing self-supervised learning methods simplify polymers into repeating units and neglect their inherent periodicity.\n\n> Introducing the periodicity prior effectively enhances model performance.\n\n## Connections\n\n- [[YuhuiWu]] — First author and developer of the PerioGT framework.\n- [[JianJi]] — Corresponding senior author and project supervisor.\n- [[ZhejiangUniversity]] — The authors are affiliated with Zhejiang University.\n- [[PerioGT]] — Main model proposed by the paper.\n- [[PolymerPeriodicity]] — Domain prior encoded by the model.\n- [[PolymerGraph]] — Graph construction used to represent polymer structures and conditions.\n- [[ContrastiveLearning]] — One of the principal self-supervised objectives.\n- [[DMF-MRL]] — Related work in this collection that also fuses domain knowledge with ML for polymer and membrane science.\n\n## Contradictions\n\n- No direct contradiction with the current wiki. Both current papers argue that domain-specific structure and mechanism should be represented explicitly rather than left entirely to generic molecular features.\n\n## Source Metadata\n\n- DOI: 10.1038/s43588-025-00903-9\n- Journal: Nature Computational Science\n- Publication date: 20 November 2025\n- Authors: Yuhui Wu, Cong Wang, Xintian Shen, Tianyi Zhang, Peng Zhang and Jian Ji.\n- Code: https://github.com/wuyuhui-zju/PerioGT\n",
+      "preview": "## Summary This paper introduces [[PerioGT]], a periodicity-aware graph-transformer framework for polymer representation learning and property prediction. It treats the repeated-unit structure of polymers as a chemical p",
+      "group": -1,
+      "value": 9
+    },
+    {
+      "id": "entities/DanLu",
+      "label": "Dan Lu",
+      "type": "entity",
+      "color": "#2196F3",
+      "path": "wiki/entities/DanLu.md",
+      "markdown": "---\ntitle: \"Dan Lu\"\ntype: entity\ntags: [researcher, membrane-science]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal]\nlast_updated: 2026-09-14\n---\n\n# Dan Lu\n\nDan Lu is the first author of the study on data-mechanism-fused design of membranes for organic micropollutant removal. In that work, Lu and collaborators developed the [[DMF-MRL]] framework, combining molecular fingerprints, physical models and interpretable machine learning to analyze [[PolyamideMembranes]].\n\n## Connections\n\n- [[DMF-MRL]] — Main method in the associated paper.\n- [[OrganicMicropollutants]] — Application domain.\n- [[PolyamideMembranes]] — Membrane materials analyzed and modified.\n",
+      "preview": "# Dan Lu Dan Lu is the first author of the study on data-mechanism-fused design of membranes for organic micropollutant removal. In that work, Lu and collaborators developed the [[DMF-MRL]] framework, combining molecular",
+      "group": -1,
+      "value": 6
+    },
+    {
+      "id": "entities/YuhuiWu",
+      "label": "Yuhui Wu",
+      "type": "entity",
+      "color": "#2196F3",
+      "path": "wiki/entities/YuhuiWu.md",
+      "markdown": "---\ntitle: \"Yuhui Wu\"\ntype: entity\ntags: [researcher, polymer-informatics]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# Yuhui Wu\n\nYuhui Wu is the first author of the PerioGT study on periodicity-aware deep learning for polymers. Wu and collaborators developed a graph-based self-supervised learning framework that uses polymer periodicity as a structural prior and applied it to polymer property prediction and antimicrobial polymer discovery.\n\n## Connections\n\n- [[PerioGT]] — Framework introduced in the associated paper.\n- [[PolymerPeriodicity]] — Central domain prior.\n- [[PolymerGraph]] — Graph representation used by the framework.\n",
+      "preview": "# Yuhui Wu Yuhui Wu is the first author of the PerioGT study on periodicity-aware deep learning for polymers. Wu and collaborators developed a graph-based self-supervised learning framework that uses polymer periodicity ",
+      "group": -1,
+      "value": 6
+    },
+    {
+      "id": "entities/JianJi",
+      "label": "Jian Ji",
+      "type": "entity",
+      "color": "#2196F3",
+      "path": "wiki/entities/JianJi.md",
+      "markdown": "---\ntitle: \"Jian Ji\"\ntype: entity\ntags: [researcher, polymer-science]\nsources: [periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# Jian Ji\n\nJian Ji is a corresponding senior author of the PerioGT study on periodicity-aware deep learning for polymers. In the study, Ji helped guide a domain-specific graph-learning framework that connects polymer structural periodicity with property prediction and experimental antimicrobial polymer discovery.\n\n## Connections\n\n- [[PerioGT]] — Framework introduced in the associated paper.\n- [[PolymerPeriodicity]] — Central structural prior.\n- [[ZhejiangUniversity]] — Institutional affiliation in the study.\n",
+      "preview": "# Jian Ji Jian Ji is a corresponding senior author of the PerioGT study on periodicity-aware deep learning for polymers. In the study, Ji helped guide a domain-specific graph-learning framework that connects polymer stru",
+      "group": -1,
+      "value": 5
+    },
+    {
+      "id": "entities/ZhejiangUniversity",
+      "label": "Zhejiang University",
+      "type": "entity",
+      "color": "#2196F3",
+      "path": "wiki/entities/ZhejiangUniversity.md",
+      "markdown": "---\ntitle: \"Zhejiang University\"\ntype: entity\ntags: [institution, polymer-science, materials-science]\nsources: [a-smart-framework-to-design-membranes-for-organic-micropollutants-removal, periodicity-aware-deep-learning-for-polymers]\nlast_updated: 2026-09-14\n---\n\n# Zhejiang University\n\nZhejiang University is an institution represented in both papers currently stored in the wiki. The first study includes work on membrane and water treatment, while the second is affiliated with polymer science and develops [[PerioGT]] for polymer informatics. This overlap links water-treatment membrane design and polymer representation learning within the current collection.\n\n## Connections\n\n- [[DanLu]] — First author of the membrane study.\n- [[YuhuiWu]] — First author of the polymer deep-learning study.\n- [[PolyamideMembranes]] — Materials context in the membrane study.\n- [[PerioGT]] — Polymer-informatics context in the second study.\n",
+      "preview": "# Zhejiang University Zhejiang University is an institution represented in both papers currently stored in the wiki. The first study includes work on membrane and water treatment, while the second is affiliated with poly",
+      "group": -1,
+      "value": 8
+    }
+  ],
+  "edges": [
+    {
+      "id": "overview->concepts/DMF-MRL:EXTRACTED",
+      "from": "overview",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "overview",
+        "line": 11,
+        "excerpt": "The current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molecular fingerprints with physical"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "overview->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "overview",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "overview",
+        "line": 11,
+        "excerpt": "The current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molecular fingerprints with physical"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "overview->concepts/PerioGT:EXTRACTED",
+      "from": "overview",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "overview",
+        "line": 11,
+        "excerpt": "The current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molecular fingerprints with physical"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "overview->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "overview",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "overview",
+        "line": 11,
+        "excerpt": "The current collection focuses on machine learning for polymer and membrane science. The two papers share a data-driven materials design perspective, but operate at different levels: [[DMF-MRL]] combines molecular fingerprints with physical"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerGraph->concepts/PerioGT:EXTRACTED",
+      "from": "concepts/PolymerGraph",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerGraph",
+        "line": 15,
+        "excerpt": "- [[PerioGT]] — Main model using PolymerGraph."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerGraph->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "concepts/PolymerGraph",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerGraph",
+        "line": 16,
+        "excerpt": "- [[PolymerPeriodicity]] — Repeated-unit structure motivates the representation."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerGraph->concepts/ContrastiveLearning:EXTRACTED",
+      "from": "concepts/PolymerGraph",
+      "to": "concepts/ContrastiveLearning",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerGraph",
+        "line": 17,
+        "excerpt": "- [[ContrastiveLearning]] — Augmented PolymerGraph views support pre-training."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DSPM-DE->concepts/DMF-MRL:EXTRACTED",
+      "from": "concepts/DSPM-DE",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DSPM-DE",
+        "line": 15,
+        "excerpt": "- [[DMF-MRL]] — Embeds DSPM-DE-derived features."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DSPM-DE->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "concepts/DSPM-DE",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DSPM-DE",
+        "line": 16,
+        "excerpt": "- [[PolyamideMembranes]] — Membrane pore and charge properties are central inputs."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DSPM-DE->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "concepts/DSPM-DE",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DSPM-DE",
+        "line": 17,
+        "excerpt": "- [[OrganicMicropollutants]] — Molecular size and charge vary across OMPs."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DMF-MRL->concepts/XDLVO:EXTRACTED",
+      "from": "concepts/DMF-MRL",
+      "to": "concepts/XDLVO",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DMF-MRL",
+        "line": 11,
+        "excerpt": "Data-mechanism-fused molecular representation learning (DMF-MRL) is the framework proposed for OMP-removal membrane design. It combines molecular fingerprints, multilevel feature descriptors and physical-model features from [[XDLVO]] and [["
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DMF-MRL->concepts/DSPM-DE:EXTRACTED",
+      "from": "concepts/DMF-MRL",
+      "to": "concepts/DSPM-DE",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DMF-MRL",
+        "line": 11,
+        "excerpt": "Data-mechanism-fused molecular representation learning (DMF-MRL) is the framework proposed for OMP-removal membrane design. It combines molecular fingerprints, multilevel feature descriptors and physical-model features from [[XDLVO]] and [["
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DMF-MRL->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "concepts/DMF-MRL",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DMF-MRL",
+        "line": 15,
+        "excerpt": "- [[OrganicMicropollutants]] — Prediction target."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DMF-MRL->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "concepts/DMF-MRL",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DMF-MRL",
+        "line": 18,
+        "excerpt": "- [[PolyamideMembranes]] — Material platform for the design rules."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/DMF-MRL->concepts/PerioGT:EXTRACTED",
+      "from": "concepts/DMF-MRL",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/DMF-MRL",
+        "line": 19,
+        "excerpt": "- [[PerioGT]] — Related domain-knowledge-guided representation-learning framework."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerPeriodicity->concepts/PerioGT:EXTRACTED",
+      "from": "concepts/PolymerPeriodicity",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerPeriodicity",
+        "line": 15,
+        "excerpt": "- [[PerioGT]] — Explicitly models this prior."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerPeriodicity->concepts/PolymerGraph:EXTRACTED",
+      "from": "concepts/PolymerPeriodicity",
+      "to": "concepts/PolymerGraph",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerPeriodicity",
+        "line": 16,
+        "excerpt": "- [[PolymerGraph]] — Represents repeated-unit structure and polymer conditions."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolymerPeriodicity->concepts/ContrastiveLearning:EXTRACTED",
+      "from": "concepts/PolymerPeriodicity",
+      "to": "concepts/ContrastiveLearning",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolymerPeriodicity",
+        "line": 17,
+        "excerpt": "- [[ContrastiveLearning]] — Uses augmented views to learn periodicity-aware invariance."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/XDLVO->concepts/DMF-MRL:EXTRACTED",
+      "from": "concepts/XDLVO",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/XDLVO",
+        "line": 15,
+        "excerpt": "- [[DMF-MRL]] — Uses XDLVO as a mechanism feature."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/XDLVO->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "concepts/XDLVO",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/XDLVO",
+        "line": 16,
+        "excerpt": "- [[PolyamideMembranes]] — Membrane surface interactions are modeled."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/XDLVO->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "concepts/XDLVO",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/XDLVO",
+        "line": 17,
+        "excerpt": "- [[OrganicMicropollutants]] — Solutes whose rejection is analyzed."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/ContrastiveLearning->concepts/PerioGT:EXTRACTED",
+      "from": "concepts/ContrastiveLearning",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/ContrastiveLearning",
+        "line": 15,
+        "excerpt": "- [[PerioGT]] — Uses periodicity-aware contrastive pre-training."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/ContrastiveLearning->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "concepts/ContrastiveLearning",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/ContrastiveLearning",
+        "line": 16,
+        "excerpt": "- [[PolymerPeriodicity]] — Defines the invariances the model should learn."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/ContrastiveLearning->concepts/PolymerGraph:EXTRACTED",
+      "from": "concepts/ContrastiveLearning",
+      "to": "concepts/PolymerGraph",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/ContrastiveLearning",
+        "line": 17,
+        "excerpt": "- [[PolymerGraph]] — Supplies graph views for the self-supervised objective."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolyamideMembranes->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "concepts/PolyamideMembranes",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolyamideMembranes",
+        "line": 15,
+        "excerpt": "- [[OrganicMicropollutants]] — Contaminants targeted by the membranes."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolyamideMembranes->concepts/DMF-MRL:EXTRACTED",
+      "from": "concepts/PolyamideMembranes",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolyamideMembranes",
+        "line": 16,
+        "excerpt": "- [[DMF-MRL]] — Learns and interprets rejection mechanisms."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolyamideMembranes->concepts/XDLVO:EXTRACTED",
+      "from": "concepts/PolyamideMembranes",
+      "to": "concepts/XDLVO",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolyamideMembranes",
+        "line": 17,
+        "excerpt": "- [[XDLVO]] — Describes membrane-solute interaction energy."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PolyamideMembranes->concepts/DSPM-DE:EXTRACTED",
+      "from": "concepts/PolyamideMembranes",
+      "to": "concepts/DSPM-DE",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PolyamideMembranes",
+        "line": 18,
+        "excerpt": "- [[DSPM-DE]] — Describes pore and charge exclusion."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/OrganicMicropollutants->concepts/DMF-MRL:EXTRACTED",
+      "from": "concepts/OrganicMicropollutants",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/OrganicMicropollutants",
+        "line": 15,
+        "excerpt": "- [[DMF-MRL]] — Model used to explain OMP rejection."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/OrganicMicropollutants->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "concepts/OrganicMicropollutants",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/OrganicMicropollutants",
+        "line": 16,
+        "excerpt": "- [[PolyamideMembranes]] — Main membrane family studied for OMP removal."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/OrganicMicropollutants->concepts/DSPM-DE:EXTRACTED",
+      "from": "concepts/OrganicMicropollutants",
+      "to": "concepts/DSPM-DE",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/OrganicMicropollutants",
+        "line": 17,
+        "excerpt": "- [[DSPM-DE]] — Represents size sieving and Donnan/dielectric exclusion."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PerioGT->concepts/PolymerGraph:EXTRACTED",
+      "from": "concepts/PerioGT",
+      "to": "concepts/PolymerGraph",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PerioGT",
+        "line": 11,
+        "excerpt": "PerioGT is a periodicity-aware graph-transformer framework for polymer representation learning. It combines [[PolymerGraph]] construction, periodicity-aware augmentation, contrastive learning, masked node modeling and learned periodicity pr"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PerioGT->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "concepts/PerioGT",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PerioGT",
+        "line": 15,
+        "excerpt": "- [[PolymerPeriodicity]] — Structural prior encoded by PerioGT."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PerioGT->concepts/ContrastiveLearning:EXTRACTED",
+      "from": "concepts/PerioGT",
+      "to": "concepts/ContrastiveLearning",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PerioGT",
+        "line": 17,
+        "excerpt": "- [[ContrastiveLearning]] — Self-supervised training objective."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "concepts/PerioGT->concepts/DMF-MRL:EXTRACTED",
+      "from": "concepts/PerioGT",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "concepts/PerioGT",
+        "line": 18,
+        "excerpt": "- [[DMF-MRL]] — Another materials-ML framework that incorporates domain knowledge."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/DMF-MRL:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 13,
+        "excerpt": "This paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combines molecular fingerprints with "
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/XDLVO:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/XDLVO",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 13,
+        "excerpt": "This paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combines molecular fingerprints with "
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/DSPM-DE:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/DSPM-DE",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 13,
+        "excerpt": "This paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combines molecular fingerprints with "
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 13,
+        "excerpt": "This paper presents a data-mechanism-fused molecular representation learning model, [[DMF-MRL]], for understanding and designing polymeric membranes that remove organic micropollutants (OMPs). The model combines molecular fingerprints with "
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->entities/DanLu:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "entities/DanLu",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 32,
+        "excerpt": "- [[DanLu]] — First author and contributor to the membrane design study."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->entities/ZhejiangUniversity:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "entities/ZhejiangUniversity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 33,
+        "excerpt": "- [[ZhejiangUniversity]] — The study includes researchers from Zhejiang University."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 34,
+        "excerpt": "- [[OrganicMicropollutants]] — Target contaminants whose rejection is modeled."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal->concepts/PerioGT:EXTRACTED",
+      "from": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/a-smart-framework-to-design-membranes-for-organic-micropollutants-removal",
+        "line": 39,
+        "excerpt": "- [[PerioGT]] — Related work in this collection that also embeds polymer-domain knowledge into ML."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->concepts/PerioGT:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 13,
+        "excerpt": "This paper introduces [[PerioGT]], a periodicity-aware graph-transformer framework for polymer representation learning and property prediction. It treats the repeated-unit structure of polymers as a chemical prior and combines periodicity-a"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->concepts/PolymerGraph:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "concepts/PolymerGraph",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 20,
+        "excerpt": "- The framework uses [[PolymerGraph]] representations with virtual nodes to connect copolymer components and incorporate sample-level conditions such as copolymer type and molecular weight."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->entities/YuhuiWu:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "entities/YuhuiWu",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 33,
+        "excerpt": "- [[YuhuiWu]] — First author and developer of the PerioGT framework."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->entities/JianJi:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "entities/JianJi",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 34,
+        "excerpt": "- [[JianJi]] — Corresponding senior author and project supervisor."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->entities/ZhejiangUniversity:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "entities/ZhejiangUniversity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 35,
+        "excerpt": "- [[ZhejiangUniversity]] — The authors are affiliated with Zhejiang University."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 37,
+        "excerpt": "- [[PolymerPeriodicity]] — Domain prior encoded by the model."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->concepts/ContrastiveLearning:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "concepts/ContrastiveLearning",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 39,
+        "excerpt": "- [[ContrastiveLearning]] — One of the principal self-supervised objectives."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "sources/periodicity-aware-deep-learning-for-polymers->concepts/DMF-MRL:EXTRACTED",
+      "from": "sources/periodicity-aware-deep-learning-for-polymers",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "sources/periodicity-aware-deep-learning-for-polymers",
+        "line": 40,
+        "excerpt": "- [[DMF-MRL]] — Related work in this collection that also fuses domain knowledge with ML for polymer and membrane science."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/DanLu->concepts/DMF-MRL:EXTRACTED",
+      "from": "entities/DanLu",
+      "to": "concepts/DMF-MRL",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/DanLu",
+        "line": 11,
+        "excerpt": "Dan Lu is the first author of the study on data-mechanism-fused design of membranes for organic micropollutant removal. In that work, Lu and collaborators developed the [[DMF-MRL]] framework, combining molecular fingerprints, physical model"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/DanLu->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "entities/DanLu",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/DanLu",
+        "line": 11,
+        "excerpt": "Dan Lu is the first author of the study on data-mechanism-fused design of membranes for organic micropollutant removal. In that work, Lu and collaborators developed the [[DMF-MRL]] framework, combining molecular fingerprints, physical model"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/DanLu->concepts/OrganicMicropollutants:EXTRACTED",
+      "from": "entities/DanLu",
+      "to": "concepts/OrganicMicropollutants",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/DanLu",
+        "line": 16,
+        "excerpt": "- [[OrganicMicropollutants]] — Application domain."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/YuhuiWu->concepts/PerioGT:EXTRACTED",
+      "from": "entities/YuhuiWu",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/YuhuiWu",
+        "line": 15,
+        "excerpt": "- [[PerioGT]] — Framework introduced in the associated paper."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/YuhuiWu->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "entities/YuhuiWu",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/YuhuiWu",
+        "line": 16,
+        "excerpt": "- [[PolymerPeriodicity]] — Central domain prior."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/YuhuiWu->concepts/PolymerGraph:EXTRACTED",
+      "from": "entities/YuhuiWu",
+      "to": "concepts/PolymerGraph",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/YuhuiWu",
+        "line": 17,
+        "excerpt": "- [[PolymerGraph]] — Graph representation used by the framework."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/JianJi->concepts/PerioGT:EXTRACTED",
+      "from": "entities/JianJi",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/JianJi",
+        "line": 15,
+        "excerpt": "- [[PerioGT]] — Framework introduced in the associated paper."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/JianJi->concepts/PolymerPeriodicity:EXTRACTED",
+      "from": "entities/JianJi",
+      "to": "concepts/PolymerPeriodicity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/JianJi",
+        "line": 16,
+        "excerpt": "- [[PolymerPeriodicity]] — Central structural prior."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/JianJi->entities/ZhejiangUniversity:EXTRACTED",
+      "from": "entities/JianJi",
+      "to": "entities/ZhejiangUniversity",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/JianJi",
+        "line": 17,
+        "excerpt": "- [[ZhejiangUniversity]] — Institutional affiliation in the study."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/ZhejiangUniversity->concepts/PerioGT:EXTRACTED",
+      "from": "entities/ZhejiangUniversity",
+      "to": "concepts/PerioGT",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/ZhejiangUniversity",
+        "line": 11,
+        "excerpt": "Zhejiang University is an institution represented in both papers currently stored in the wiki. The first study includes work on membrane and water treatment, while the second is affiliated with polymer science and develops [[PerioGT]] for p"
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/ZhejiangUniversity->entities/DanLu:EXTRACTED",
+      "from": "entities/ZhejiangUniversity",
+      "to": "entities/DanLu",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/ZhejiangUniversity",
+        "line": 15,
+        "excerpt": "- [[DanLu]] — First author of the membrane study."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/ZhejiangUniversity->entities/YuhuiWu:EXTRACTED",
+      "from": "entities/ZhejiangUniversity",
+      "to": "entities/YuhuiWu",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/ZhejiangUniversity",
+        "line": 16,
+        "excerpt": "- [[YuhuiWu]] — First author of the polymer deep-learning study."
+      },
+      "title": "",
+      "label": ""
+    },
+    {
+      "id": "entities/ZhejiangUniversity->concepts/PolyamideMembranes:EXTRACTED",
+      "from": "entities/ZhejiangUniversity",
+      "to": "concepts/PolyamideMembranes",
+      "type": "EXTRACTED",
+      "relation": "LINKS_TO",
+      "status": "STABLE",
+      "color": "#555555",
+      "confidence": 1.0,
+      "evidence": {
+        "page": "entities/ZhejiangUniversity",
+        "line": 17,
+        "excerpt": "- [[PolyamideMembranes]] — Materials context in the membrane study."
+      },
+      "title": "",
+      "label": ""
+    }
+  ],
+  "built": "2026-09-14"
+}
